@@ -1,0 +1,63 @@
+name: Expirar Keys Automaticamente
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Roda todo dia à meia-noite
+  workflow_dispatch:      # Permite rodar manualmente
+
+jobs:
+  expire-keys:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write     # Permite fazer commit no repositório
+    
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Expirar keys vencidas
+        run: |
+          node -e "
+            const fs = require('fs');
+            
+            // Ler o arquivo keys.json
+            const data = JSON.parse(fs.readFileSync('keys.json', 'utf8'));
+            
+            const agora = new Date();
+            let expiradas = 0;
+            
+            data.keys = data.keys.map(k => {
+              // Se já estiver inativa, pula
+              if (!k.active) return k;
+              
+              const criacao = new Date(k.createdAt);
+              const diasPassados = (agora - criacao) / (1000 * 60 * 60 * 24);
+              
+              // Se passou do tempo de expiração, desativa
+              if (diasPassados >= k.expiresIn) {
+                k.active = false;
+                k.expiredAt = agora.toISOString();
+                expiradas++;
+              }
+              
+              return k;
+            });
+            
+            // Salvar o arquivo atualizado
+            fs.writeFileSync('keys.json', JSON.stringify(data, null, 2));
+            
+            console.log(`✅ ${expiradas} key(s) expirada(s) e desativada(s).`);
+          "
+          
+      - name: Commit e Push das alterações
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add keys.json
+          git diff --staged --quiet || git commit -m "🔄 Keys expiradas automaticamente [skip ci]"
+          git push
