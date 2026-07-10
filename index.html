@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trap Scanner | System Breach</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#06040a', secondary: '#0d0a1a',
+                        purple: '#A855F7', purpleDark: '#7C3AED', purpleLight: '#C084FC',
+                        neon: '#D946EF', cyan: '#22D3EE', green: '#00FF88',
+                        discord: '#5865F2',
+                        card: '#120d24',
+                        border: '#2a1a4a'
+                    },
+                    fontFamily: { 'tech': ['Orbitron', 'sans-serif'], 'main': ['Rajdhani', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #06040a; 
+            font-family: 'Rajdhani', sans-serif; 
+            color: #e8e8f0; 
+            min-height: 100vh; 
+            overflow-x: hidden;
+        }
+
+        /* ===== FUNDO MATRIX HACKER ===== */
+        #matrixCanvas {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            width: 100vw;
+            height: 100vh;
+            opacity: 0.15;
+        }
+
+        /* ===== SOBREPOSIÇÃO PARA MELHOR LEGIBILIDADE ===== */
+        .overlay-gradient {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(ellipse at center, rgba(6,4,10,0.3) 0%, rgba(6,4,10,0.7) 100%);
+            pointer-events: none;
+        }
+
+        .text-shadow-purple { text-shadow: 0 0 20px #A855F7, 0 0 40px #A855F766; }
+        .text-shadow-cyan { text-shadow: 0 0 20px #22D3EE, 0 0 40px #22D3EE44; }
+        .border-glow-purple { border: 1px solid rgba(168, 85, 247, 0.4); box-shadow: 0 0 30px rgba(168, 85, 247, 0.08); }
+        .border-glow-cyan { border: 1px solid rgba(34, 211, 238, 0.3); box-shadow: 0 0 30px rgba(34, 211, 238, 0.05); }
+        
+        .glass { 
+            background: rgba(12, 8, 26, 0.88); 
+            backdrop-filter: blur(16px); 
+            border: 1px solid rgba(168, 85, 247, 0.12); 
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn { transition: all 0.3s; }
+        .btn:hover { transform: scale(1.02); }
+        
+        .barra-progresso { height: 22px; background: #120d24; border-radius: 12px; overflow: hidden; border: 1px solid #A855F755; margin: 15px 0; }
+        .preenchimento { 
+            height: 100%; width: 0%; 
+            background: linear-gradient(90deg, #7C3AED, #D946EF); 
+            border-radius: 12px; transition: width 0.3s ease; 
+            box-shadow: 0 0 30px #A855F766; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 13px; font-weight: bold; 
+            color: #fff;
+        }
+
+        .key-input {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: rgba(18, 13, 36, 0.8);
+            border: 1px solid #2a1a4a;
+            color: #e8e8f0;
+        }
+        .key-input:focus {
+            border-color: #A855F7;
+            outline: none;
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.15);
+        }
+
+        .user-info {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            z-index: 100;
+            font-size: 0.7rem;
+            color: #A855F7;
+            opacity: 0.5;
+            text-align: right;
+            line-height: 1.5;
+        }
+        .user-info .key-display { color: #D946EF; opacity: 0.6; font-size: 0.65rem; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: rgba(168, 85, 247, 0.04);
+            border: 1px solid rgba(168, 85, 247, 0.1);
+            border-radius: 12px;
+            padding: 14px 12px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .stat-card:hover {
+            border-color: rgba(168, 85, 247, 0.3);
+            background: rgba(168, 85, 247, 0.06);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.05);
+        }
+        .stat-card .numero {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #A855F7;
+            display: block;
+        }
+        .stat-card .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8888aa;
+            margin-top: 2px;
+        }
+
+        .expand-card {
+            border: 1px solid rgba(168, 85, 247, 0.08);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            background: rgba(168, 85, 247, 0.02);
+            transition: all 0.3s;
+        }
+        .expand-card:hover {
+            border-color: rgba(168, 85, 247, 0.2);
+        }
+        .expand-card .header {
+            padding: 14px 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            user-select: none;
+        }
+        .expand-card .header:hover { background: rgba(168, 85, 247, 0.04); }
+        .expand-card .header .titulo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .expand-card .header .titulo .badge {
+            font-size: 0.5rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .expand-card .header .titulo .badge.proxy { background: #7C3AED44; color: #A855F7; border: 1px solid #A855F733; }
+        .expand-card .header .titulo .badge.mod { background: #22D3EE22; color: #22D3EE; border: 1px solid #22D3EE33; }
+        .expand-card .header .qtd {
+            font-size: 0.85rem;
+            color: #666;
+            margin-left: 4px;
+        }
+        .expand-card .header .seta {
+            font-size: 1rem;
+            transition: transform 0.3s;
+            color: #555;
+        }
+        .expand-card .header .seta.aberta { transform: rotate(180deg); }
+        
+        .expand-card .conteudo-expand {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+            padding: 0 18px;
+        }
+        .expand-card .conteudo-expand.aberto {
+            max-height: 600px;
+            padding: 0 18px 18px 18px;
+        }
+        
+        .expand-card .conteudo-expand .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .expand-card .conteudo-expand .item .nome {
+            font-size: 0.85rem;
+            color: #e8e8f0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+        }
+        .expand-card .conteudo-expand .item .status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .expand-card .conteudo-expand .item .status .tag {
+            font-size: 0.5rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .expand-card .conteudo-expand .item .status .tag.proxy-tag { background: #7C3AED44; color: #A855F7; border: 1px solid #A855F733; }
+        .expand-card .conteudo-expand .item .status .tag.mod-tag { background: #22D3EE22; color: #22D3EE; border: 1px solid #22D3EE33; }
+        .expand-card .conteudo-expand .item .status .presente {
+            color: #00FF88;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .expand-card .conteudo-expand .item .status .logs {
+            color: #444;
+            font-size: 0.7rem;
+        }
+        .expand-card .conteudo-expand .item .desc {
+            font-size: 0.65rem;
+            color: #555;
+            padding-top: 2px;
+            width: 100%;
+        }
+
+        .footer-safe {
+            margin-top: 24px;
+            padding: 16px 0 8px 0;
+            border-top: 1px solid rgba(168, 85, 247, 0.06);
+            text-align: center;
+        }
+        .footer-safe p {
+            font-size: 0.65rem;
+            color: #444;
+            letter-spacing: 0.3px;
+        }
+        .footer-safe .email {
+            color: #A855F7;
+            font-weight: 500;
+        }
+
+        .btn-discord-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #5865F2;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-discord-header:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(88, 101, 242, 0.3);
+            background: #4752C4;
+        }
+        .btn-discord-header i { font-size: 1.1rem; }
+
+        .nav-btn {
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+            cursor: pointer;
+            background: rgba(168, 85, 247, 0.04);
+            color: #8888aa;
+            border-color: rgba(168, 85, 247, 0.06);
+            font-size: 0.85rem;
+        }
+        .nav-btn:hover { background: rgba(168, 85, 247, 0.08); color: #e8e8f0; }
+        .nav-btn.ativa {
+            background: rgba(168, 85, 247, 0.12);
+            color: #A855F7;
+            border-color: rgba(168, 85, 247, 0.3);
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.05);
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(168, 85, 247, 0.15);
+            background: rgba(168, 85, 247, 0.02);
+            transition: all 0.3s;
+            border-radius: 16px;
+        }
+        .upload-area:hover {
+            border-color: rgba(168, 85, 247, 0.35);
+            background: rgba(168, 85, 247, 0.04);
+        }
+
+        .card-shadow { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); }
+        .text-gray-400 { color: #8888aa !important; }
+        .text-gray-500 { color: #666688 !important; }
+        .text-gray-300 { color: #aaaacc !important; }
+
+        .result-list { max-height: 500px; overflow-y: auto; padding-right: 4px; }
+        .result-list::-webkit-scrollbar { width: 4px; }
+        .result-list::-webkit-scrollbar-track { background: #120d24; border-radius: 10px; }
+        .result-list::-webkit-scrollbar-thumb { background: #A855F7; border-radius: 10px; }
+
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .expand-card .header .titulo { font-size: 0.8rem; flex-wrap: wrap; }
+        }
+
+        .glow-border {
+            position: relative;
+        }
+        .glow-border::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, #A855F7, #D946EF, #22D3EE);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== FUNDO MATRIX HACKER (CANVAS) ===== -->
+    <canvas id="matrixCanvas"></canvas>
+    <div class="overlay-gradient"></div>
+
+    <!-- TELA DE LOGIN -->
+    <div id="telaLogin" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-md glass rounded-2xl border-glow-purple p-8 shadow-2xl card-shadow glow-border">
+            <div class="text-center mb-8">
+                <h1 class="font-tech text-3xl text-purple text-shadow-purple mb-2">TRAP SCANNER</h1>
+                <p class="text-gray-400 text-sm">ACESSO RESTRITO</p>
+                <div class="w-12 h-1 bg-gradient-to-r from-purple to-cyan mx-auto mt-2 rounded-full"></div>
+            </div>
+            <div id="avisoErro" class="hidden bg-purple-500/10 border border-purple-500/30 text-purple-400 p-3 rounded-xl mb-4 text-center font-bold text-sm"></div>
+            <div id="statusLogin" class="hidden text-center py-2 text-cyan-400 text-sm">🔍 VERIFICANDO...</div>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">🔑 KEY</label>
+                    <input type="text" id="keyInput" placeholder="EX: EYE-ABCD-1234-XYZ" maxlength="19"
+                           class="key-input w-full px-4 py-3 rounded-xl text-lg text-center">
+                </div>
+                <button id="btnLogin" class="btn w-full py-4 bg-purple/20 hover:bg-purple/30 text-purple font-tech rounded-xl border-glow-purple text-lg transition-all">🔓 VERIFICAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAINEL PRINCIPAL -->
+    <div id="painel" class="hidden container mx-auto px-4 py-6 max-w-4xl relative z-10">
+        <header class="glass rounded-2xl p-4 mb-6 flex justify-between items-center flex-wrap gap-3 card-shadow border-glow-purple">
+            <h1 class="font-tech text-xl text-purple text-shadow-purple">TRAP SCANNER</h1>
+            <div class="flex items-center gap-3 flex-wrap">
+                <span id="nomeUser" class="text-sm font-bold text-gray-300"></span>
+                <button id="sair" class="text-purple-400 hover:text-purple-300 font-bold transition-colors text-sm">SAIR</button>
+            </div>
+        </header>
+
+        <div class="flex flex-wrap gap-3 mb-6 items-center">
+            <button onclick="aba('scan')" id="bScan" class="nav-btn ativa">SCANNER</button>
+            <button onclick="aba('admin')" id="bAdmin" class="nav-btn">PAINEL ADMIN</button>
+            <a href="https://discord.gg/r6gfFvSkU" target="_blank" class="btn-discord-header">
+                <i class="fa fa-discord"></i> DISCORD
+            </a>
+        </div>
+
+        <div id="pagScan" class="conteudo">
+            <div class="glass rounded-2xl border-glow-purple p-6 shadow-xl card-shadow">
+                <h2 class="font-tech text-xl text-purple text-shadow-purple mb-6 text-center">🔍 ANÁLISE DE SEGURANÇA</h2>
+                
+                <label for="arquivo" class="upload-area flex flex-col items-center justify-center w-full h-40 rounded-2xl cursor-pointer p-6 text-center mb-6 transition-all">
+                    <i class="fa fa-archive text-4xl text-purple/60 mb-3"></i>
+                    <span class="text-lg font-medium text-gray-300" id="nomeArq">📂 SELECIONE O ARQUIVO (ZIP)</span>
+                    <span class="text-xs text-gray-500 mt-1">.zip, .tar, .gz ou pasta compactada</span>
+                    <input id="arquivo" type="file" accept=".zip,.tar,.gz" class="hidden" />
+                </label>
+                
+                <div id="areaProgresso" class="hidden">
+                    <p class="text-center text-sm text-gray-300 mb-1">⏳ Processando arquivo...</p>
+                    <div class="barra-progresso">
+                        <div id="barra" class="preenchimento">0%</div>
+                    </div>
+                </div>
+
+                <button id="analisar" class="btn w-full py-4 bg-purple/20 hover:bg-purple/30 text-purple font-tech rounded-xl border-glow-purple text-lg disabled:opacity-40 transition-all" disabled>
+                    🚀 INICIAR BUSCA
+                </button>
+
+                <div id="result" class="hidden mt-8"></div>
+            </div>
+        </div>
+
+        <div id="pagAdmin" class="conteudo hidden">
+            <div class="glass rounded-2xl border-glow-purple p-6 shadow-xl card-shadow">
+                <h2 class="font-tech text-2xl text-purple text-shadow-purple mb-6 text-center">📊 GERENCIAMENTO DE ACESSOS</h2>
+                <div class="bg-purple-500/5 border border-purple-500/20 p-4 rounded-xl mb-6 text-center">
+                    <p class="font-bold text-purple-400 text-sm">🔄 Keys sincronizadas com o GitHub</p>
+                    <p class="text-xs text-gray-400">Expiração automática: todos os dias à meia-noite</p>
+                </div>
+                <h3 class="font-tech text-lg mb-4 text-purple">📋 LISTA DE KEYS</h3>
+                <div id="listaKeys" class="space-y-3"></div>
+                <p id="vazio" class="text-gray-500 text-center py-4 text-sm">Nenhuma key cadastrada</p>
+                <div class="mt-6 text-center text-xs text-gray-500">
+                    <p>📝 Para adicionar/remover keys, edite o arquivo <code class="text-purple">keys.json</code> no GitHub</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="user-info" id="userInfo" style="display:none;">
+        <div id="userNameDisplay">👤 Carregando...</div>
+        <div class="key-display" id="keyDisplay">🔑 ...</div>
+    </div><script>
+    // ============================================================
+    // 🎬 MATRIX HACKER - FUNDO COM LETRAS CAINDO
+    // ============================================================
+    const matrixCanvas = document.getElementById('matrixCanvas');
+    const matrixCtx = matrixCanvas.getContext('2d');
+
+    let matrixWidth, matrixHeight;
+    let matrixColumns;
+    let drops = [];
+    const matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+{}[]|:;<>,.?/~`アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+
+    function resizeMatrix() {
+        matrixWidth = window.innerWidth;
+        matrixHeight = window.innerHeight;
+        matrixCanvas.width = matrixWidth;
+        matrixCanvas.height = matrixHeight;
+        
+        const fontSize = 18;
+        matrixColumns = Math.floor(matrixWidth / fontSize);
+        
+        // Inicializar gotas
+        drops = [];
+        for (let i = 0; i < matrixColumns; i++) {
+            drops[i] = {
+                y: Math.random() * -matrixHeight,
+                speed: 0.5 + Math.random() * 2,
+                length: 10 + Math.floor(Math.random() * 20),
+                char: matrixChars[Math.floor(Math.random() * matrixChars.length)]
+            };
+        }
+    }
+
+    resizeMatrix();
+    window.addEventListener('resize', resizeMatrix);
+
+    function drawMatrix() {
+        // Fundo semi-transparente para efeito de rastro
+        matrixCtx.fillStyle = 'rgba(6, 4, 10, 0.04)';
+        matrixCtx.fillRect(0, 0, matrixWidth, matrixHeight);
+
+        const fontSize = 18;
+        matrixCtx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+            const drop = drops[i];
+            
+            // Gerar novo caractere aleatório
+            const char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+            const x = i * fontSize;
+            const y = drop.y;
+
+            // Cor com gradiente de brilho
+            const brightness = Math.min(1, (drop.y + matrixHeight) / (matrixHeight * 1.5));
+            const alpha = 0.3 + brightness * 0.7;
+            
+            // Cores em roxo
+            const colors = [
+                `rgba(168, 85, 247, ${alpha * 0.6})`,
+                `rgba(217, 70, 239, ${alpha * 0.5})`,
+                `rgba(34, 211, 238, ${alpha * 0.3})`
+            ];
+            
+            // Escolher cor aleatória entre as opções
+            matrixCtx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Sombra para brilho
+            matrixCtx.shadowColor = 'rgba(168, 85, 247, 0.1)';
+            matrixCtx.shadowBlur = 8;
+            
+            matrixCtx.fillText(char, x, y);
+
+            // Resetar sombra
+            matrixCtx.shadowBlur = 0;
+
+            // Atualizar posição
+            drop.y += drop.speed;
+
+            // Resetar quando sair da tela
+            if (drop.y > matrixHeight + 50) {
+                drop.y = -50 - Math.random() * 100;
+                drop.speed = 0.5 + Math.random() * 2.5;
+                drop.length = 8 + Math.floor(Math.random() * 25);
+            }
+
+            // Linhas de destaque (primeiros caracteres mais brilhantes)
+            if (drop.y > 0 && drop.y < matrixHeight) {
+                for (let j = 1; j < Math.min(drop.length, 6); j++) {
+                    const yPos = drop.y - j * fontSize;
+                    if (yPos > 0) {
+                        const alpha2 = 0.1 + (1 - j / drop.length) * 0.3;
+                        matrixCtx.fillStyle = `rgba(168, 85, 247, ${alpha2 * 0.3})`;
+                        matrixCtx.fillText(
+                            matrixChars[Math.floor(Math.random() * matrixChars.length)],
+                            x,
+                            yPos
+                        );
+                    }
+                }
+            }
+        }
+
+        requestAnimationFrame(drawMatrix);
+    }
+
+    // Iniciar animação
+    drawMatrix();
+
+    // ============================================================
+    // CONFIGURAÇÃO
+    // ============================================================
+    const GITHUB_USER = 'toledoguilherme081-eng';
+    const GITHUB_REPO = 'trap';
+    const KEYS_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/keys.json?t=`;
+
+    // ============================================================
+    // CATEGORIAS
+    // ============================================================
+    const CATEGORIAS = {
+        proxy: {
+            label: 'PROXYS DETECTADOS',
+            badge: 'PROXY',
+            badgeClass: 'proxy',
+            tagClass: 'proxy-tag',
+            icone: 'exclamation-triangle',
+            cor: '#A855F7',
+            items: [
+                "com.netflix.mediaclientxx",
+                "com.nu.roxinho",
+                "com.proxy.free",
+                "com.dripclient.proxy",
+                "client.by (Proxy External)",
+                "com.mcdo.mcdonaldss",
+                "com.lucasqueiroz.fitcal",
+                "com.aincrad.proxy"
+            ]
+        },
+        modificacao: {
+            label: 'MODIFICAÇÕES DO SISTEMA (BUGREPORT)',
+            badge: 'SISTEMA',
+            badgeClass: 'mod',
+            tagClass: 'mod-tag',
+            icone: 'cog',
+            cor: '#22D3EE',
+            items: [
+                "KernelSU", "Zygote", "KSU Daemon", "SU Binary", "Root Acess",
+                "vbmetafix", "tricky_store", "zn-daemon64", "zygisk", "TEESimulator",
+                "remote_socket", "/data/adb/modules", "mtmanager_toggle", "cleanerBugReport",
+                "yurikey", "TA_utl", "ksu_toolkit", "snapperf", "invisível_root_zygote",
+                "magisk", "Apatch"
+            ]
+        }
+    };
+
+    // ============================================================
+    // SISTEMA DE KEY
+    // ============================================================
+    async function carregarKeys() {
+        try {
+            const url = KEYS_URL + Date.now();
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Erro ao carregar keys do GitHub');
+            const data = await response.json();
+            return data.keys || [];
+        } catch (error) {
+            console.error('Erro ao carregar keys:', error);
+            return [];
+        }
+    }
+
+    async function verifyKey(keyDigitada) {
+        try {
+            const keys = await carregarKeys();
+            const keyEncontrada = keys.find(k => k.key === keyDigitada);
+            if (!keyEncontrada) return { valid: false, message: 'Key não encontrada' };
+            if (!keyEncontrada.active) return { valid: false, message: 'Key expirada ou desativada' };
+            const criacao = new Date(keyEncontrada.createdAt);
+            const agora = new Date();
+            const diasPassados = (agora - criacao) / (1000 * 60 * 60 * 24);
+            if (diasPassados >= keyEncontrada.expiresIn) return { valid: false, message: 'Key expirada' };
+            return { valid: true, key: keyEncontrada, diasRestantes: Math.floor(keyEncontrada.expiresIn - diasPassados) };
+        } catch (error) {
+            console.error(error);
+            return { valid: false, message: 'Erro de conexão' };
+        }
+    }
+
+    // ============================================================
+    // LOGIN
+    // ============================================================
+    const loginScreen = document.getElementById('telaLogin');
+    const painel = document.getElementById('painel');
+    const keyInput = document.getElementById('keyInput');
+    const loginBtn = document.getElementById('btnLogin');
+    const aviso = document.getElementById('avisoErro');
+    const statusLogin = document.getElementById('statusLogin');
+    const nomeUser = document.getElementById('nomeUser');
+    const sairBtn = document.getElementById('sair');
+    const userInfo = document.getElementById('userInfo');
+    const userNameDisplay = document.getElementById('userNameDisplay');
+    const keyDisplay = document.getElementById('keyDisplay');
+
+    const savedKey = localStorage.getItem('trap_scanner_key');
+
+    if (savedKey) {
+        verifyKey(savedKey).then(result => {
+            if (result.valid) {
+                entrar(savedKey, result.diasRestantes);
+            } else {
+                localStorage.removeItem('trap_scanner_key');
+            }
+        });
+    }
+
+    keyInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            loginBtn.click();
+        }
+    });
+
+    loginBtn.addEventListener('click', async () => {
+        const key = keyInput.value.trim().toUpperCase();
+        aviso.classList.add('hidden');
+        statusLogin.classList.remove('hidden');
+        if (!key) {
+            aviso.textContent = '⚠️ DIGITE UMA KEY VÁLIDA';
+            aviso.classList.remove('hidden');
+            statusLogin.classList.add('hidden');
+            return;
+        }
+        loginBtn.disabled = true;
+        loginBtn.textContent = '⏳ VERIFICANDO...';
+        const result = await verifyKey(key);
+        statusLogin.classList.add('hidden');
+        loginBtn.disabled = false;
+        loginBtn.textContent = '🔓 VERIFICAR';
+        if (result.valid) {
+            localStorage.setItem('trap_scanner_key', key);
+            entrar(key, result.diasRestantes);
+        } else {
+            aviso.textContent = '❌ ' + result.message;
+            aviso.classList.remove('hidden');
+        }
+    });
+
+    function entrar(key, diasRestantes) {
+        loginScreen.style.display = 'none';
+        painel.classList.remove('hidden');
+        nomeUser.textContent = '✅ ' + key + ' (' + diasRestantes + 'd restantes)';
+        userInfo.style.display = 'block';
+        userNameDisplay.textContent = '👤 Usuário Verificado';
+        keyDisplay.textContent = '🔑 ' + key;
+        carregarPainelAdmin();
+    }
+
+    sairBtn.addEventListener('click', () => {
+        localStorage.removeItem('trap_scanner_key');
+        location.reload();
+    });
+
+    function aba(nome) {
+        document.querySelectorAll('.conteudo').forEach(a => a.classList.add('hidden'));
+        document.querySelectorAll('#bScan, #bAdmin').forEach(b => b.classList.remove('ativa'));
+        document.getElementById('pag' + nome.charAt(0).toUpperCase() + nome.slice(1)).classList.remove('hidden');
+        document.getElementById('b' + nome.charAt(0).toUpperCase() + nome.slice(1)).classList.add('ativa');
+        if (nome === 'admin') carregarPainelAdmin();
+    }
+
+    async function carregarPainelAdmin() {
+        const lista = document.getElementById('listaKeys');
+        const vazio = document.getElementById('vazio');
+        lista.innerHTML = '';
+        try {
+            const keys = await carregarKeys();
+            if (keys.length === 0) { vazio.classList.remove('hidden'); return; }
+            vazio.classList.add('hidden');
+            const agora = new Date();
+            keys.forEach(k => {
+                const criacao = new Date(k.createdAt);
+                const diasPassados = (agora - criacao) / (1000 * 60 * 60 * 24);
+                const expirada = !k.active || diasPassados >= k.expiresIn;
+                const diasRestantes = Math.floor(k.expiresIn - diasPassados);
+                const div = document.createElement('div');
+                div.className = 'glass p-4 rounded-xl border border-gray-700 flex justify-between items-center flex-wrap gap-2';
+                div.innerHTML = '<div><span class="font-tech text-purple text-sm">' + k.key + '</span><span class="text-xs text-gray-400 ml-2">Criada: ' + new Date(k.createdAt).toLocaleDateString() + '</span></div><div class="flex items-center gap-3"><span class="key-status ' + (expirada ? 'expirada' : 'ativa') + ' text-xs">' + (expirada ? '❌ EXPIRADA' : '✅ ATIVA (' + diasRestantes + 'd)') + '</span><span class="text-xs text-gray-500">Expira em ' + k.expiresIn + 'd</span></div>';
+                lista.appendChild(div);
+            });
+        } catch (erro) {
+            lista.innerHTML = '<p class="text-purple-400 text-center text-sm">❌ Erro ao carregar keys</p>';
+        }
+    }        // ============================================================
+        // SCANNER
+        // ============================================================
+        const entrada = document.getElementById('arquivo');
+        const nomeArq = document.getElementById('nomeArq');
+        const botaoAnalisar = document.getElementById('analisar');
+        const areaResultado = document.getElementById('result');
+        const areaProgresso = document.getElementById('areaProgresso');
+        const barra = document.getElementById('barra');
+        let arquivoEscolhido = null;
+
+        const TODOS_ITENS = [];
+        Object.keys(CATEGORIAS).forEach(cat => {
+            CATEGORIAS[cat].items.forEach(item => {
+                TODOS_ITENS.push({
+                    pattern: item.toLowerCase().trim(),
+                    categoria: cat,
+                    display: item
+                });
+            });
+        });
+
+        entrada.addEventListener('change', function(e) {
+            const arq = e.target.files[0];
+            if (!arq) return;
+            arquivoEscolhido = arq;
+            nomeArq.textContent = '✅ ' + arq.name;
+            botaoAnalisar.disabled = false;
+            areaResultado.classList.add('hidden');
+            areaProgresso.classList.add('hidden');
+        });
+
+        function atualizarProgresso(porcentagem) {
+            barra.style.width = porcentagem + '%';
+            barra.textContent = porcentagem + '%';
+        }
+
+        function formatarData(data) {
+            return data.toLocaleString('pt-BR', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+        }
+
+        window.toggleExpand = function(header) {
+            const conteudo = header.nextElementSibling;
+            const seta = header.querySelector('.seta');
+            if (conteudo.classList.contains('aberto')) {
+                conteudo.classList.remove('aberto');
+                seta.classList.remove('aberta');
+            } else {
+                conteudo.classList.add('aberto');
+                seta.classList.add('aberta');
+            }
+        };
+
+        botaoAnalisar.addEventListener('click', async function() {
+            if (!arquivoEscolhido) return alert('SELECIONE O ARQUIVO!');
+            
+            botaoAnalisar.disabled = true;
+            areaResultado.classList.add('hidden');
+            areaResultado.innerHTML = '';
+            areaProgresso.classList.remove('hidden');
+            atualizarProgresso(5);
+
+            try {
+                atualizarProgresso(15);
+                const zip = await JSZip.loadAsync(arquivoEscolhido);
+                atualizarProgresso(35);
+                const arquivos = Object.values(zip.file(/\.txt$|sysdiagnose|bugreport/i)).filter(arq => !arq.dir);
+                let textoTotal = '';
+                const inicio = performance.now();
+
+                for(let i = 0; i < arquivos.length; i++) {
+                    textoTotal += await arquivos[i].async('text') + '\n';
+                    let porcentagemLeitura = Math.round(40 + ((i + 1) / arquivos.length) * 40);
+                    atualizarProgresso(porcentagemLeitura);
+                }
+
+                atualizarProgresso(85);
+                
+                const agora = new Date();
+                const resultados = [];
+                const textoLower = textoTotal.toLowerCase();
+                
+                TODOS_ITENS.forEach(item => {
+                    if (textoLower.includes(item.pattern)) {
+                        resultados.push({
+                            package: item.display,
+                            categoria: item.categoria,
+                            timestamp: agora
+                        });
+                    }
+                });
+
+                const unicos = [];
+                const vistos = new Set();
+                resultados.forEach(r => {
+                    if (!vistos.has(r.package)) {
+                        vistos.add(r.package);
+                        unicos.push(r);
+                    }
+                });
+
+                const fim = performance.now();
+                const tempoProcessamento = ((fim - inicio) / 1000).toFixed(1);
+
+                atualizarProgresso(100);
+
+                setTimeout(function() {
+                    areaResultado.classList.remove('hidden');
+                    
+                    const grupos = {};
+                    unicos.forEach(r => {
+                        if (!grupos[r.categoria]) grupos[r.categoria] = [];
+                        grupos[r.categoria].push(r.package);
+                    });
+
+                    const totalArquivos = arquivos.length;
+                    const totalDetectados = unicos.length;
+                    const totalProxys = grupos.proxy ? grupos.proxy.length : 0;
+
+                    let html = '';
+                    
+                    // STATS
+                    html += '<div class="stats-grid">';
+                    html += '<div class="stat-card"><span class="numero">' + totalArquivos + '</span><div class="label">ARQUIVOS ANALISADOS</div></div>';
+                    html += '<div class="stat-card"><span class="numero">' + totalDetectados + '</span><div class="label">ENTRADAS DETECTADAS</div></div>';
+                    html += '<div class="stat-card"><span class="numero">' + totalProxys + '</span><div class="label">PROXYS DETECTADOS</div></div>';
+                    html += '<div class="stat-card"><span class="numero">' + tempoProcessamento + 's</span><div class="label">TEMPO DE PROCESSAMENTO</div></div>';
+                    html += '</div>';
+
+                    html += '<div style="font-size:0.7rem;color:#555;margin-bottom:16px;letter-spacing:0.5px;">// RESULTADOS DA ANÁLISE</div>';
+
+                    // PROXYS
+                    if (grupos.proxy && grupos.proxy.length > 0) {
+                        html += '<div class="expand-card">';
+                        html += '<div class="header" onclick="toggleExpand(this)"><div class="titulo"><i class="fa fa-exclamation-triangle" style="color:#A855F7;"></i><span>PROXYS DETECTADOS</span><span class="badge proxy">PROXY</span><span class="qtd">' + grupos.proxy.length + '</span></div><span class="seta">▼</span></div>';
+                        html += '<div class="conteudo-expand">';
+                        grupos.proxy.forEach(function(pkg) {
+                            html += '<div class="item"><span class="nome">' + pkg + '</span><div class="status"><span class="tag proxy-tag">PROXY</span><span class="presente">PRESENTE</span><span class="logs">0 log(s)</span></div><div class="desc">App presente no sistema (notificações/logs encontrados)</div></div>';
+                        });
+                        html += '<div style="margin-top:8px;font-size:0.6rem;color:#444;border-top:1px solid rgba(168,85,247,0.06);padding-top:8px;">🕐 ' + formatarData(agora) + '</div>';
+                        html += '</div></div>';
+                    }
+
+                    // MODIFICAÇÕES
+                    if (grupos.modificacao && grupos.modificacao.length > 0) {
+                        html += '<div class="expand-card">';
+                        html += '<div class="header" onclick="toggleExpand(this)"><div class="titulo"><i class="fa fa-cog" style="color:#22D3EE;"></i><span>MODIFICAÇÕES DO SISTEMA (BUGREPORT)</span><span class="badge mod">SISTEMA</span><span class="qtd">' + grupos.modificacao.length + '</span></div><span class="seta">▼</span></div>';
+                        html += '<div class="conteudo-expand">';
+                        grupos.modificacao.forEach(function(pkg) {
+                            html += '<div class="item"><span class="nome">' + pkg + '</span><div class="status"><span class="tag mod-tag">SISTEMA</span><span class="presente">PRESENTE</span><span class="logs">0 log(s)</span></div></div>';
+                        });
+                        html += '<div style="margin-top:8px;font-size:0.6rem;color:#444;border-top:1px solid rgba(34,211,238,0.06);padding-top:8px;">🕐 ' + formatarData(agora) + '</div>';
+                        html += '</div></div>';
+                    }
+
+                    if (totalDetectados === 0) {
+                        html += '<div style="text-align:center;padding:40px 0;border:1px solid rgba(0,255,136,0.15);border-radius:12px;background:rgba(0,255,136,0.02);"><i class="fa fa-check-circle" style="font-size:3rem;color:#00FF88;display:block;margin-bottom:12px;"></i><span style="font-size:1.2rem;color:#00FF88;">✅ SISTEMA LIMPO</span><p style="color:#555;margin-top:8px;">Nenhuma ameaça detectada</p></div>';
+                    }
+
+                    // RODAPÉ
+                    html += '<div class="footer-safe"><p>🔒 Nenhum arquivo é transmitido ou armazenado. Toda a análise ocorre no navegador.<br><span class="email">trapscreen@gmail.com</span> <span style="color:#444;">| Diário (expira em 1 dia)</span></p></div>';
+
+                    areaResultado.innerHTML = html;
+                    
+                    setTimeout(function() {
+                        atualizarProgresso(0);
+                        areaProgresso.classList.add('hidden');
+                    }, 1500);
+
+                }, 400);
+
+            } catch (erro) {
+                alert('ERRO: ' + erro.message);
+                atualizarProgresso(0);
+                areaProgresso.classList.add('hidden');
+            }
+            finally {
+                botaoAnalisar.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
