@@ -7,7 +7,7 @@
       "active": true
     },
     {
-      "key": "KEY-TRAP-VISION",
+      "key": "MACA",
       "createdAt": "2026-07-10T14:30:00.000Z",
       "expiresIn": 1,
       "active": true
@@ -23,7 +23,12 @@
       "createdAt": "2026-07-10T14:30:00.000Z",
       "expiresIn": 28,
       "active": true
-    }
+    },
+    {
+      "key": "FREE1D",
+      "createdAt": "2026-07-10T14:30:00.000Z",
+      "expiresIn": 1,
+      "active": true
       
   ]
 }
