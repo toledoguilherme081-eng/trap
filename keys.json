@@ -1,25 +1,16 @@
 {
   "keys": [
     {
-      "key": "HTML",
-      "createdAt": "2026-01-10T14:30:00.000Z",
-      "expiresIn": 30,
-      "active": false,
-      "expiredAt": "2026-07-10T15:20:27.482Z"
-    },
-    {
-      "key": "TRAP",
-      "createdAt": "2026-01-15T10:20:00.000Z",
-      "expiresIn": 15,
-      "active": false,
-      "expiredAt": "2026-07-10T15:20:27.482Z"
-    },
-    {
       "key": "KERNEL",
-      "createdAt": "2026-01-01T08:00:00.000Z",
-      "expiresIn": 7,
-      "active": false,
-      "expiredAt": "2026-07-10T15:20:27.482Z"
+      "createdAt": "2026-07-10T14:30:00.000Z",
+      "expiresIn": 30,
+      "active": true
+    },
+    {
+      "key": "KEY-TRAP-VISION",
+      "createdAt": "2026-07-10T14:30:00.000Z",
+      "expiresIn": 1,
+      "active": true
     }
   ]
 }
