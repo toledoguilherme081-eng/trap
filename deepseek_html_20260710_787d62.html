@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trap Scanner | System Breach</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#06040a', secondary: '#0d0a1a',
+                        green: '#00FF88', greenDark: '#00CC77',
+                        blue: '#00C2FF', blueDark: '#0088CC',
+                        purple: '#A855F7', purpleDark: '#7C3AED',
+                        orange: '#FF6B00', red: '#FF1A4A',
+                        discord: '#5865F2',
+                        card: '#120d24',
+                        border: '#2a1a4a'
+                    },
+                    fontFamily: { 'tech': ['Orbitron', 'sans-serif'], 'main': ['Rajdhani', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #06040a; 
+            font-family: 'Rajdhani', sans-serif; 
+            color: #e8e8f0; 
+            min-height: 100vh; 
+            overflow-x: hidden;
+        }
+
+        #matrix {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.06;
+        }
+
+        .text-shadow-red { text-shadow: 0 0 12px #FF1A4A, 0 0 25px #FF1A4A66; }
+        .text-shadow-gold { text-shadow: 0 0 8px #FFD700, 0 0 15px #FFD70044; }
+        .border-glow-red { border: 1px solid rgba(255, 26, 74, 0.4); box-shadow: 0 0 20px rgba(255, 26, 74, 0.08); }
+        
+        .glass { 
+            background: rgba(16, 16, 30, 0.85); 
+            backdrop-filter: blur(16px); 
+            border: 1px solid rgba(255, 26, 74, 0.12); 
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn { transition: all 0.3s; }
+        .btn:hover { transform: scale(1.03); }
+        
+        .barra-progresso { height: 22px; background: #1a1a2e; border-radius: 12px; overflow: hidden; border: 1px solid #FF1A4A55; margin: 15px 0; }
+        .preenchimento { 
+            height: 100%; width: 0%; 
+            background: linear-gradient(90deg, #FF1A4A, #ff5c7c); 
+            border-radius: 12px; transition: width 0.3s ease; 
+            box-shadow: 0 0 20px #FF1A4A55; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 13px; font-weight: bold; 
+            color: #fff;
+        }
+
+        .key-input {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: rgba(20, 20, 40, 0.6);
+            border: 1px solid #3a3a5a;
+            color: #e8e8f0;
+        }
+        .key-input:focus {
+            border-color: #FF1A4A;
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 26, 74, 0.15);
+        }
+
+        .user-info {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            z-index: 100;
+            font-size: 0.7rem;
+            color: #66ff99;
+            opacity: 0.4;
+            text-align: right;
+            line-height: 1.5;
+        }
+        .user-info .key-display { color: #00ff41; opacity: 0.6; font-size: 0.65rem; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: rgba(255, 26, 74, 0.03);
+            border: 1px solid rgba(255, 26, 74, 0.06);
+            border-radius: 12px;
+            padding: 12px 10px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .stat-card:hover {
+            border-color: rgba(255, 26, 74, 0.2);
+            background: rgba(255, 26, 74, 0.05);
+            transform: translateY(-2px);
+        }
+        .stat-card .numero {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00FF88, #00C2FF, #A855F7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: block;
+        }
+        .stat-card .label {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .expand-card {
+            border: 1px solid rgba(255, 26, 74, 0.06);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s;
+        }
+        .expand-card:hover {
+            border-color: rgba(255, 26, 74, 0.15);
+        }
+        .expand-card .header {
+            padding: 14px 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            user-select: none;
+        }
+        .expand-card .header:hover { background: rgba(255, 26, 74, 0.03); }
+        .expand-card .header .titulo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #1a1a2e;
+        }
+        .expand-card .header .titulo .badge {
+            font-size: 0.5rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .expand-card .header .titulo .badge.proxy { background: rgba(0, 194, 255, 0.15); color: #0088CC; border: 1px solid rgba(0, 194, 255, 0.2); }
+        .expand-card .header .titulo .badge.mod { background: rgba(168, 85, 247, 0.15); color: #7C3AED; border: 1px solid rgba(168, 85, 247, 0.2); }
+        .expand-card .header .titulo .badge.uninstall { background: rgba(255, 26, 74, 0.12); color: #cc0000; border: 1px solid rgba(255, 26, 74, 0.15); }
+        .expand-card .header .titulo .badge.sideload { background: rgba(255, 107, 0, 0.12); color: #cc5500; border: 1px solid rgba(255, 107, 0, 0.15); }
+        .expand-card .header .qtd {
+            font-size: 0.85rem;
+            color: #666;
+            margin-left: 4px;
+        }
+        .expand-card .header .seta {
+            font-size: 1rem;
+            transition: transform 0.3s;
+            color: #555;
+        }
+        .expand-card .header .seta.aberta { transform: rotate(180deg); }
+        
+        .expand-card .conteudo-expand {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+            padding: 0 18px;
+        }
+        .expand-card .conteudo-expand.aberto {
+            max-height: 600px;
+            padding: 0 18px 18px 18px;
+        }
+        
+        .expand-card .conteudo-expand .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .expand-card .conteudo-expand .item .nome {
+            font-size: 0.8rem;
+            color: #1a1a2e;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            word-break: break-all;
+        }
+        .expand-card .conteudo-expand .item .info {
+            font-size: 0.7rem;
+            color: #666;
+        }
+        .expand-card .conteudo-expand .item .info .data-hora {
+            color: #888;
+            font-size: 0.6rem;
+        }
+        .expand-card .conteudo-expand .item .status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .expand-card .conteudo-expand .item .status .tag {
+            font-size: 0.5rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+        .expand-card .conteudo-expand .item .status .tag.proxy-tag { background: rgba(0, 194, 255, 0.1); color: #0088CC; border: 1px solid rgba(0, 194, 255, 0.15); }
+        .expand-card .conteudo-expand .item .status .tag.mod-tag { background: rgba(168, 85, 247, 0.1); color: #7C3AED; border: 1px solid rgba(168, 85, 247, 0.15); }
+        .expand-card .conteudo-expand .item .status .tag.uninstall-tag { background: rgba(255, 26, 74, 0.1); color: #cc0000; border: 1px solid rgba(255, 26, 74, 0.12); }
+        .expand-card .conteudo-expand .item .status .tag.sideload-tag { background: rgba(255, 107, 0, 0.1); color: #cc5500; border: 1px solid rgba(255, 107, 0, 0.12); }
+        .expand-card .conteudo-expand .item .status .presente {
+            color: #00CC77;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        .expand-card .conteudo-expand .item .status .logs {
+            color: #666;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        .expand-card .conteudo-expand .item .status .logs .num {
+            color: #1a1a2e;
+            font-weight: 700;
+        }
+        .expand-card .conteudo-expand .item .desc {
+            font-size: 0.6rem;
+            color: #888;
+            padding-top: 2px;
+            width: 100%;
+        }
+
+        .footer-safe {
+            margin-top: 24px;
+            padding: 16px 0 8px 0;
+            border-top: 1px solid rgba(255, 26, 74, 0.05);
+            text-align: center;
+        }
+        .footer-safe p {
+            font-size: 0.65rem;
+            color: #444;
+            letter-spacing: 0.3px;
+        }
+        .footer-safe .email {
+            background: linear-gradient(135deg, #00FF88, #00C2FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 500;
+        }
+
+        .btn-discord-header {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #5865F2;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-discord-header:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(88, 101, 242, 0.3);
+            background: #4752C4;
+        }
+        .btn-discord-header i { font-size: 1.1rem; }
+
+        .btn-group-bottom {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 16px;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-bottom {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.04);
+            color: #8888aa;
+            border-color: rgba(255, 26, 74, 0.06);
+            font-size: 0.85rem;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .btn-bottom:hover { 
+            background: rgba(255, 26, 74, 0.08); 
+            color: #e8e8f0;
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        .btn-bottom.ativa {
+            background: rgba(255, 26, 74, 0.12);
+            color: #FF1A4A;
+            border-color: rgba(255, 26, 74, 0.3);
+            box-shadow: 0 0 30px rgba(255, 26, 74, 0.05);
+        }
+        .btn-bottom.admin-hidden {
+            display: none !important;
+        }
+
+        .btn-discord-bottom {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #5865F2;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(88, 101, 242, 0.2);
+        }
+        .btn-discord-bottom:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(88, 101, 242, 0.3);
+            background: #4752C4;
+        }
+        .btn-discord-bottom i { font-size: 1.1rem; }
+
+        .btn-analisar {
+            width: 100%;
+            padding: 14px;
+            background: #1a1a2e;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+        .btn-analisar:hover:not(:disabled) {
+            background: #2a2a4e;
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+        }
+        .btn-analisar:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 26, 74, 0.15);
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s;
+            border-radius: 16px;
+        }
+        .upload-area:hover {
+            border-color: rgba(255, 26, 74, 0.3);
+            background: rgba(255, 26, 74, 0.04);
+        }
+
+        .card-shadow { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); }
+
+        .glow-border {
+            position: relative;
+        }
+        .glow-border::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, #00FF88, #00C2FF, #A855F7);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .admin-badge {
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: #FFD700;
+            font-size: 0.55rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .key-status {
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+        .key-status.ativa { background: rgba(0, 255, 136, 0.15); color: #00CC77; border: 1px solid rgba(0, 255, 136, 0.2); }
+        .key-status.expirada { background: rgba(255, 0, 0, 0.1); color: #cc0000; border: 1px solid rgba(255, 0, 0, 0.15); }
+
+        .btn-voltar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #8888aa;
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 26, 74, 0.06);
+            cursor: pointer;
+        }
+        .btn-voltar:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.02);
+            color: #e8e8f0;
+        }
+        .btn-voltar i { font-size: 1rem; }
+
+        .main-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .container-central {
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix"></canvas>
+
+    <!-- TELA DE LOGIN -->
+    <div id="telaLogin" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-md glass rounded-2xl border-glow-red p-8 shadow-2xl card-shadow glow-border">
+            <div class="text-center mb-8">
+                <h1 class="font-tech text-3xl text-red text-shadow-red mb-2">TRAP SCANNER</h1>
+                <p class="text-gray-400 text-sm">ACESSO RESTRITO</p>
+                <div class="w-12 h-1 bg-gradient-to-r from-green via-blue to-purple mx-auto mt-2 rounded-full"></div>
+            </div>
+            <div id="avisoErro" class="hidden bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-xl mb-4 text-center font-bold text-sm"></div>
+            <div id="statusLogin" class="hidden text-center py-2 text-blue-400 text-sm">🔍 VERIFICANDO...</div>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">🔑 KEY</label>
+                    <input type="text" id="keyInput" placeholder="EX: EYE-ABCD-1234-XYZ" maxlength="19"
+                           class="key-input w-full px-4 py-3 rounded-xl text-lg text-center">
+                </div>
+                <button id="btnLogin" class="btn w-full py-4 bg-red/20 hover:bg-red/30 text-red font-tech rounded-xl border-glow-red text-lg transition-all" style="color: #FF1A4A;">🔓 VERIFICAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAINEL PRINCIPAL -->
+    <div id="painel" class="hidden main-content relative z-10">
+        <header class="glass rounded-2xl p-4 mb-6 flex justify-between items-center flex-wrap gap-3 card-shadow border-glow-red">
+            <h1 class="font-tech text-xl text-red text-shadow-red">TRAP SCANNER</h1>
+            <div class="flex items-center gap-3 flex-wrap">
+                <span id="nomeUser" class="text-sm font-bold text-gray-300"></span>
+                <span id="adminBadge" class="admin-badge hidden">👑 ADMIN</span>
+                <button id="sair" class="text-red-400 hover:text-red-300 font-bold transition-colors text-sm">SAIR</button>
+            </div>
+        </header>
+
+        <div id="pagScan" class="conteudo">
+            <div class="glass rounded-2xl border-glow-red p-6 shadow-xl card-shadow">
+                <h2 class="font-tech text-xl mb-6 text-center" style="background: linear-gradient(135deg, #00FF88, #00C2FF, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🔍 ANÁLISE DE SEGURANÇA</h2>
+                
+                <div class="container-central">
+                    <label for="arquivo" class="upload-area flex flex-col items-center justify-center w-full h-40 rounded-2xl cursor-pointer p-6 text-center mb-6 transition-all">
+                        <i class="fa fa-archive text-4xl mb-3" style="color: rgba(255, 26, 74, 0.4);"></i>
+                        <span class="text-lg font-medium text-gray-300" id="nomeArq">📂 SELECIONE O ARQUIVO (ZIP)</span>
+                        <span class="text-xs text-gray-500 mt-1">.zip, .tar, .gz ou pasta compactada</span>
+                        <input id="arquivo" type="file" accept=".zip,.tar,.gz" class="hidden" />
+                    </label>
+                    
+                    <div id="areaProgresso" class="hidden">
+                        <p class="text-center text-sm text-gray-300 mb-1">⏳ Processando arquivo...</p>
+                        <div class="barra-progresso">
+                            <div id="barra" class="preenchimento">0%</div>
+                        </div>
+                    </div>
+
+                    <button id="analisar" class="btn-analisar" disabled>
+                        🔍 INICIAR ANÁLISE
+                    </button>
+
+                    <div class="btn-group-bottom">
+                        <button onclick="aba('scan')" id="bScan" class="btn-bottom ativa">SCANNER</button>
+                        <!-- Botão PAINEL ADMIN - só aparece se for admin (controlado pelo JavaScript) -->
+                        <button onclick="aba('admin')" id="bAdmin" class="btn-bottom admin-hidden">PAINEL ADMIN</button>
+                        <a href="https://discord.gg/r6gfFvSkU" target="_blank" class="btn-discord-bottom">
+                            <i class="fa fa-discord"></i> DISCORD
+                        </a>
+                    </div>
+                </div>
+
+                <div id="result" class="hidden mt-8"></div>
+            </div>
+        </div>
+
+        <div id="pagAdmin" class="conteudo hidden">
+            <div class="glass rounded-2xl border-glow-red p-6 shadow-xl card-shadow">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-tech text-2xl" style="background: linear-gradient(135deg, #00FF88, #00C2FF, #A855F7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">📊 GERENCIAMENTO DE ACESSOS</h2>
+                    <button onclick="aba('scan')" class="btn-voltar">
+                        <i class="fa fa-arrow-left"></i> VOLTAR
+                    </button>
+                </div>
+                <div class="bg-green-500/5 border border-green-500/20 p-4 rounded-xl mb-6 text-center">
+                    <p class="font-bold text-green-400 text-sm">🔄 Keys sincronizadas com o GitHub</p>
+                    <p class="text-xs text-gray-400">Expiração automática: todos os dias à meia-noite</p>
+                </div>
+                <h3 class="font-tech text-lg mb-4 text-blue-400">📋 LISTA DE KEYS</h3>
+                <div id="listaKeys" class="space-y-3"></div>
+                <p id="vazio" class="text-gray-500 text-center py-4 text-sm">Nenhuma key cadastrada</p>
+                <div class="mt-6 text-center text-xs text-gray-400">
+                    <p>📝 Para adicionar/remover keys, edite o arquivo <code style="color: #00FF88;">keys.json</code> no GitHub</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="user-info" id="userInfo" style="display:none;">
+        <div id="userNameDisplay">👤 Carregando...</div>
+        <div class="key-display" id="keyDisplay">🔑 ...</div>
+    </div>
+
+    <script>
+        // ============================================================
+        // MATRIX ANIMATION
+        // ============================================================
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+{}[]|:;<>,.?/~`アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+        const fontSize = 16;
+        let colunas = Math.floor(canvas.width / fontSize);
+        let gotas = Array(colunas).fill(1);
+
+        function desenhar() {
+            ctx.fillStyle = 'rgba(6, 4, 10, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#FF1A4A';
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < gotas.length; i++) {
+                let texto = letras[Math.floor(Math.random() * letras.length)];
+                ctx.fillText(texto, i * fontSize, gotas[i] * fontSize);
+                
+                if(gotas[i] * fontSize > canvas.height && Math.random() > 0.975) gotas[i] = 0;
+                gotas[i]++;
+            }
+        }
+        setInterval(desenhar, 50);
+
+        // ============================================================
+        // CONFIGURAÇÃO
+        // ============================================================
+        const GITHUB_USER = 'toledoguilherme081-eng';
+        const GITHUB_REPO = 'trap';
+        const KEYS_URL = 'https://raw.githubusercontent.com/' + GITHUB_USER + '/' + GITHUB_REPO + '/main/keys.json?t=';
+
+        // ============================================================
+        // CATEGORIAS
+        // ============================================================
+        const CATEGORIAS = {
+            proxy: {
+                label: 'PROXYS DETECTADOS',
+                badge: 'PROXY',
+                badgeClass: 'proxy',
+                tagClass: 'proxy-tag',
+                icone: 'exclamation-triangle',
+                cor: '#00C2FF',
+                items: [
+                    "com.netflix.mediaclientxx",
+                    "com.nu.roxinho",
+                    "com.proxy.free",
+                    "com.dripclient.proxy",
+                    "client.by (Proxy External)",
+                    "com.mcdo.mcdonaldss",
+                    "com.lucasqueiroz.fitcal",
+                    "com.aincrad.proxy",
+                    "io.gringoxp.proxy.garena.freefire"
+                ]
+            },
+            modificacao: {
+                label: 'MODIFICAÇÕES DO SISTEMA (BUGREPORT)',
+                badge: 'SISTEMA',
+                badgeClass: 'mod',
+                tagClass: 'mod-tag',
+                icone: 'cog',
+                cor: '#A855F7',
+                items: [
+                    "KernelSU", "Zygote", "KSU Daemon", "SU Binary", "Root Acess",
+                    "vbmetafix", "tricky_store", "zn-daemon64", "zygisk", "TEESimulator",
+                    "remote_socket", "/data/adb/modules", "mtmanager_toggle", "cleanerBugReport",
+                    "yurikey", "TA_utl", "ksu_toolkit", "snapperf", "invisível_root_zygote",
+                    "magisk", "Apatch", "vipsensi", "sensi", "shizuku"
+                ]
+            }
+        };
+
+        // ============================================================
+        // SISTEMA DE KEY
+        // ============================================================
+        let isAdmin = false;
+        let currentKey = '';
+
+        async function carregarKeys() {
+            try {
+                const url = KEYS_URL + Date.now();
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Erro ao carregar keys do GitHub');
+                const data = await response.json();
+                return data.keys || [];
+            } catch (error) {
+                console.error('Erro ao carregar keys:', error);
+                return [];
+            }
+        }
+
+        async function verifyKey(keyDigitada) {
+            try {
+                const keys = await carregarKeys();
+                const keyEncontrada = keys.find(function(k) { return k.key === keyDigitada; });
+                if (!keyEncontrada) return { valid: false, message: 'Key não encontrada' };
+                if (!keyEncontrada.active) return { valid: false, message: 'Key expirada ou desativada' };
+                const criacao = new Date(keyEncontrada.createdAt);
+                const agora = new Date();
+                const diasPassados = (agora - criacao) / (1000 * 60 * 60 * 24);
+                if (diasPassados >= keyEncontrada.expiresIn) return { valid: false, message: 'Key expirada' };
+                // VERIFICA SE É ADMIN (KEY = "TRAP")
+                var isAdminKey = keyDigitada === 'TRAP';
+                return { 
+                    valid: true, 
+                    key: keyEncontrada, 
+                    diasRestantes: Math.floor(keyEncontrada.expiresIn - diasPassados),
+                    isAdmin: isAdminKey
+                };
+            } catch (error) {
+                console.error(error);
+                return { valid: false, message: 'Erro de conexão' };
+            }
+        }
+
+        // ============================================================
+        // LOGIN
+        // ============================================================
+        var loginScreen = document.getElementById('telaLogin');
+        var painel = document.getElementById('painel');
+        var keyInput = document.getElementById('keyInput');
+        var loginBtn = document.getElementById('btnLogin');
+        var aviso = document.getElementById('avisoErro');
+        var statusLogin = document.getElementById('statusLogin');
+        var nomeUser = document.getElementById('nomeUser');
+        var sairBtn = document.getElementById('sair');
+        var userInfo = document.getElementById('userInfo');
+        var userNameDisplay = document.getElementById('userNameDisplay');
+        var keyDisplay = document.getElementById('keyDisplay');
+        var adminBadge = document.getElementById('adminBadge');
+        var bAdmin = document.getElementById('bAdmin');
+        var bScan = document.getElementById('bScan');
+
+        var savedKey = localStorage.getItem('trap_scanner_key');
+
+        if (savedKey) {
+            verifyKey(savedKey).then(function(result) {
+                if (result.valid) {
+                    entrar(savedKey, result.diasRestantes, result.isAdmin);
+                } else {
+                    localStorage.removeItem('trap_scanner_key');
+                }
+            });
+        }
+
+        keyInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                loginBtn.click();
+            }
+        });
+
+        loginBtn.addEventListener('click', async function() {
+            var key = keyInput.value.trim().toUpperCase();
+            aviso.classList.add('hidden');
+            statusLogin.classList.remove('hidden');
+            if (!key) {
+                aviso.textContent = '⚠️ DIGITE UMA KEY VÁLIDA';
+                aviso.classList.remove('hidden');
+                statusLogin.classList.add('hidden');
+                return;
+            }
+            loginBtn.disabled = true;
+            loginBtn.textContent = '⏳ VERIFICANDO...';
+            var result = await verifyKey(key);
+            statusLogin.classList.add('hidden');
+            loginBtn.disabled = false;
+            loginBtn.textContent = '🔓 VERIFICAR';
+            if (result.valid) {
+                localStorage.setItem('trap_scanner_key', key);
+                entrar(key, result.diasRestantes, result.isAdmin);
+            } else {
+                aviso.textContent = '❌ ' + result.message;
+                aviso.classList.remove('hidden');
+            }
+        });
+
+        function entrar(key, diasRestantes, admin) {
+            isAdmin = admin;
+            currentKey = key;
+            
+            loginScreen.style.display = 'none';
+            painel.classList.remove('hidden');
+            nomeUser.textContent = '✅ ' + key + ' (' + diasRestantes + 'd restantes)';
+            userInfo.style.display = 'block';
+            userNameDisplay.textContent = '👤 Usuário Verificado';
+            keyDisplay.textContent = '🔑 ' + key;
+            
+            // ===== CONTROLAR VISIBILIDADE DO BOTÃO PAINEL ADMIN =====
+            if (isAdmin) {
+                // Mostrar badge de admin
+                adminBadge.classList.remove('hidden');
+                // Mostrar botão PAINEL ADMIN
+                bAdmin.classList.remove('admin-hidden');
+                bAdmin.style.display = 'block';
+                bAdmin.onclick = function() { aba('admin'); };
+            } else {
+                // Esconder badge de admin
+                adminBadge.classList.add('hidden');
+                // Esconder botão PAINEL ADMIN
+                bAdmin.classList.add('admin-hidden');
+                bAdmin.style.display = 'none';
+                // Se estiver na página admin, voltar para scan
+                if (!document.getElementById('pagScan').classList.contains('hidden')) {
+                    // já está no scan
+                } else {
+                    aba('scan');
+                }
+            }
+            
+            carregarPainelAdmin();
+        }
+
+        sairBtn.addEventListener('click', function() {
+            localStorage.removeItem('trap_scanner_key');
+            location.reload();
+        });
+
+        function aba(nome) {
+            var conteudos = document.querySelectorAll('.conteudo');
+            for (var i = 0; i < conteudos.length; i++) {
+                conteudos[i].classList.add('hidden');
+            }
+            var botoes = document.querySelectorAll('#bScan, #bAdmin');
+            for (var j = 0; j < botoes.length; j++) {
+                botoes[j].classList.remove('ativa');
+            }
+            document.getElementById('pag' + nome.charAt(0).toUpperCase() + nome.slice(1)).classList.remove('hidden');
+            document.getElementById('b' + nome.charAt(0).toUpperCase() + nome.slice(1)).classList.add('ativa');
+            if (nome === 'admin' && isAdmin) {
+                carregarPainelAdmin();
+            }
+        }
+
+        async function carregarPainelAdmin() {
+            if (!isAdmin) return;
+            
+            const lista = document.getElementById('listaKeys');
+            const vazio = document.getElementById('vazio');
+            lista.innerHTML = '';
+            try {
+                const keys = await carregarKeys();
+                if (keys.length === 0) { vazio.classList.remove('hidden'); return; }
+                vazio.classList.add('hidden');
+                const agora = new Date();
+                keys.forEach(function(k) {
+                    const criacao = new Date(k.createdAt);
+                    const diasPassados = (agora - criacao) / (1000 * 60 * 60 * 24);
+                    const expirada = !k.active || diasPassados >= k.expiresIn;
+                    const diasRestantes = Math.floor(k.expiresIn - diasPassados);
+                    const div = document.createElement('div');
+                    div.className = 'glass p-4 rounded-xl border border-gray-700 flex justify-between items-center flex-wrap gap-2';
+                    div.innerHTML = '<div><span class="font-tech text-green-600 text-sm">' + k.key + '</span><span class="text-xs text-gray-400 ml-2">Criada: ' + new Date(k.createdAt).toLocaleDateString() + '</span></div><div class="flex items-center gap-3"><span class="key-status ' + (expirada ? 'expirada' : 'ativa') + ' text-xs">' + (expirada ? '❌ EXPIRADA' : '✅ ATIVA (' + diasRestantes + 'd)') + '</span><span class="text-xs text-gray-400">Expira em ' + k.expiresIn + 'd</span></div>';
+                    lista.appendChild(div);
+                });
+            } catch (erro) {
+                lista.innerHTML = '<p class="text-green-600 text-center text-sm">❌ Erro ao carregar keys</p>';
+            }
+        }
+
+        // ============================================================
+        // SCANNER
+        // ============================================================
+        const entrada = document.getElementById('arquivo');
+        const nomeArq = document.getElementById('nomeArq');
+        const botaoAnalisar = document.getElementById('analisar');
+        const areaResultado = document.getElementById('result');
+        const areaProgresso = document.getElementById('areaProgresso');
+        const barra = document.getElementById('barra');
+        let arquivoEscolhido = null;
+
+        const TODOS_ITENS = [];
+        Object.keys(CATEGORIAS).forEach(function(cat) {
+            CATEGORIAS[cat].items.forEach(function(item) {
+                TODOS_ITENS.push({
+                    pattern: item.toLowerCase().trim(),
+                    categoria: cat,
+                    display: item
+                });
+            });
+        });
+
+        // ===== APPS DESINSTALADOS =====
+        const UNINSTALL_PATTERNS = [
+            /Removing package\s*([a-zA-Z0-9._-]+)/i,
+            /Uninstalled\s*([a-zA-Z0-9._-]+)/i,
+            /Package removed:\s*([a-zA-Z0-9._-]+)/i,
+            /uninstall\s+([a-zA-Z0-9._-]+)/i,
+            /pm uninstall\s+([a-zA-Z0-9._-]+)/i,
+            /PackageManager.*uninstall.*([a-zA-Z0-9._-]+)/i,
+            /\[([a-zA-Z0-9._-]+)\]\s*uninstalled/i
+        ];
+
+        // ===== APPS SIDELOAD =====
+        const SIDELOAD_PATTERNS = [
+            /Installing package\s*([a-zA-Z0-9._-]+)\s*from\s*(file|external|sd card|downloads?)/i,
+            /install.*from.*file/i,
+            /source="file"/i,
+            /pm install.*-r.*([a-zA-Z0-9._-]+)/i,
+            /Installed.*from.*(file|external|sd)/i,
+            /Unknown source.*([a-zA-Z0-9._-]+)/i
+        ];
+
+        // ===== LISTA DE APPS DE FÁBRICA =====
+        const APPS_FABRICA = [
+            "android", "com.android", "com.google", "com.samsung", "com.miui", 
+            "com.xiaomi", "com.qualcomm", "com.mediatek", "com.oneplus", "com.oppo",
+            "com.vivo", "com.huawei", "com.lge", "com.sony", "com.asus", "com.motorola",
+            "com.nokia", "com.htc", "com.acer", "com.lenovo", "com.zte", "com.kyocera",
+            "com.foxconn", "com.sec", "com.bbk", "com.coloros", "com.oplus", "com.realme"
+        ];
+
+        function isAppFabrica(packageName) {
+            if (!packageName) return true;
+            var lower = packageName.toLowerCase();
+            for (var i = 0; i < APPS_FABRICA.length; i++) {
+                if (lower.startsWith(APPS_FABRICA[i].toLowerCase())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function extrairDataHora(linha) {
+            var match = linha.match(/(\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/);
+            if (match) return match[1];
+            match = linha.match(/(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/);
+            if (match) return match[1];
+            match = linha.match(/(\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2})/);
+            if (match) return match[1];
+            return 'Data não disponível';
+        }
+
+        function estaNasUltimas5Horas(linha) {
+            var match = linha.match(/(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})/);
+            if (match) {
+                try {
+                    var data = new Date(match[1]);
+                    var agora = new Date();
+                    var diffHoras = (agora - data) / (1000 * 60 * 60);
+                    return diffHoras <= 5 && diffHoras >= 0;
+                } catch(e) {
+                    return true;
+                }
+            }
+            return true;
+        }
+
+        function detectarDesinstalados(linhas) {
+            var resultados = [];
+            var agora = new Date();
+            var vistos = {};
+            for (var i = 0; i < linhas.length; i++) {
+                var linha = linhas[i];
+                for (var j = 0; j < UNINSTALL_PATTERNS.length; j++) {
+                    var match = linha.match(UNINSTALL_PATTERNS[j]);
+                    if (match && match[1]) {
+                        var packageName = match[1].trim().replace(/[^a-zA-Z0-9._-]/g, '');
+                        if (packageName.length > 3 && packageName.indexOf('.') > 0 && !vistos[packageName]) {
+                            if (estaNasUltimas5Horas(linha)) {
+                                vistos[packageName] = true;
+                                var dataHora = extrairDataHora(linha);
+                                resultados.push({
+                                    package: packageName,
+                                    dataHora: dataHora || agora.toLocaleString('pt-BR'),
+                                    tipo: 'desinstalado'
+                                });
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            return resultados;
+        }
+
+        function detectarSideload(linhas) {
+            var resultados = [];
+            var agora = new Date();
+            var vistos = {};
+            for (var i = 0; i < linhas.length; i++) {
+                var linha = linhas[i];
+                for (var j = 0; j < SIDELOAD_PATTERNS.length; j++) {
+                    var match = linha.match(SIDELOAD_PATTERNS[j]);
+                    if (match) {
+                        var packageName = null;
+                        for (var k = 1; k < match.length; k++) {
+                            if (match[k] && match[k].match(/[a-zA-Z]+\.[a-zA-Z]+/)) {
+                                packageName = match[k].trim().replace(/[^a-zA-Z0-9._-]/g, '');
+                                break;
+                            }
+                        }
+                        if (!packageName || isAppFabrica(packageName)) continue;
+                        if (packageName.length > 3 && packageName.indexOf('.') > 0 && !vistos[packageName]) {
+                            vistos[packageName] = true;
+                            var dataHora = extrairDataHora(linha);
+                            resultados.push({
+                                package: packageName,
+                                dataHora: dataHora || agora.toLocaleString('pt-BR'),
+                                tipo: 'sideload'
+                            });
+                            break;
+                        }
+                    }
+                }
+            }
+            return resultados;
+        }
+
+        entrada.addEventListener('change', function(e) {
+            const arq = e.target.files[0];
+            if (!arq) return;
+            arquivoEscolhido = arq;
+            nomeArq.textContent = '✅ ' + arq.name;
+            botaoAnalisar.disabled = false;
+            areaResultado.classList.add('hidden');
+            areaProgresso.classList.add('hidden');
+        });
+
+        function atualizarProgresso(porcentagem) {
+            barra.style.width = porcentagem + '%';
+            barra.textContent = porcentagem + '%';
+        }
+
+        function formatarData(data) {
+            return data.toLocaleString('pt-BR', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+        }
+
+        window.toggleExpand = function(header) {
+            const conteudo = header.nextElementSibling;
+            const seta = header.querySelector('.seta');
+            if (conteudo.classList.contains('aberto')) {
+                conteudo.classList.remove('aberto');
+                seta.classList.remove('aberta');
+            } else {
+                conteudo.classList.add('aberto');
+                seta.classList.add('aberta');
+            }
+        };
+
+        botaoAnalisar.addEventListener('click', async function() {
+            if (!arquivoEscolhido) return alert('SELECIONE O ARQUIVO!');
+            
+            botaoAnalisar.disabled = true;
+            areaResultado.classList.add('hidden');
+            areaResultado.innerHTML = '';
+            areaProgresso.classList.remove('hidden');
+            atualizarProgresso(5);
+
+            try {
+                atualizarProgresso(15);
+                const zip = await JSZip.loadAsync(arquivoEscolhido);
+                atualizarProgresso(35);
+                const arquivos = Object.values(zip.file(/\.txt$|sysdiagnose|bugreport|logcat|dumpstate/i)).filter(function(arq) { return !arq.dir; });
+                let textoTotal = '';
+                const inicio = performance.now();
+
+                for(var i = 0; i < arquivos.length; i++) {
+                    var conteudo = await arquivos[i].async('text');
+                    textoTotal += conteudo + '\n';
+                    var porcentagemLeitura = Math.round(40 + ((i + 1) / arquivos.length) * 40);
+                    atualizarProgresso(porcentagemLeitura);
+                }
+
+                atualizarProgresso(85);
+                
+                const agora = new Date();
+                const linhas = textoTotal.split('\n');
+                const textoLower = textoTotal.toLowerCase();
+
+                // ===== CONTAGEM DE LOGS =====
+                var contagemLogs = {};
+                TODOS_ITENS.forEach(function(item) {
+                    contagemLogs[item.display] = 0;
+                });
+
+                TODOS_ITENS.forEach(function(item) {
+                    var padrao = item.pattern;
+                    var regex = new RegExp(padrao.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                    var matches = textoLower.match(regex);
+                    if (matches) {
+                        contagemLogs[item.display] = matches.length;
+                    }
+                });
+
+                // ===== PROXYS E MODIFICAÇÕES =====
+                var resultadosExistentes = [];
+                TODOS_ITENS.forEach(function(item) {
+                    var count = contagemLogs[item.display] || 0;
+                    if (count > 0) {
+                        resultadosExistentes.push({
+                            package: item.display,
+                            categoria: item.categoria,
+                            timestamp: agora,
+                            logs: count
+                        });
+                    }
+                });
+
+                // ===== DESINSTALADOS =====
+                const desinstalados = detectarDesinstalados(linhas);
+                
+                // ===== SIDELOAD =====
+                const sideload = detectarSideload(linhas);
+
+                const fim = performance.now();
+                const tempoProcessamento = ((fim - inicio) / 1000).toFixed(1);
+
+                atualizarProgresso(100);
+
+                setTimeout(function() {
+                    areaResultado.classList.remove('hidden');
+                    
+                    const grupos = {};
+                    resultadosExistentes.forEach(function(r) {
+                        if (!grupos[r.categoria]) grupos[r.categoria] = [];
+                        grupos[r.categoria].push(r);
+                    });
+
+                    const totalArquivos = arquivos.length;
+                    const totalDetectados = resultadosExistentes.length + desinstalados.length + sideload.length;
+                    const totalProxys = grupos.proxy ? grupos.proxy.length : 0;
+
+                    var html = '';
+                    
+                    // STATS
+                    html += '<div class="stats-grid">';
+                    html += '<div class="stat-card"><span class="numero">' + totalArquivos + '</span><div class="label">ARQUIVOS ANALISADOS</div></div>';
+                    html += '<div class="stat-card"><span class="numero">' + totalDetectados + '</span><div class="label">ENTRADAS DETECTADAS</div></div>';
+                    html += '<div class="stat-card"><span class="numero">' + totalProxys + '</span><div class="label">PROXYS DETECTADOS</div></div>';
+                    html += '<div class="stat-card"><span class="numero">' + desinstalados.length + '</span><div class="label">DESINSTALADOS (5h)</div></div>';
+                    html += '<div class="stat-card"><span class="numero">' + sideload.length + '</span><div class="label">SIDELOAD (Fora Play)</div></div>';
+                    html += '</div>';
+
+                    html += '<div style="font-size:0.7rem;color:#888;margin-bottom:16px;letter-spacing:0.5px;">// RESULTADOS DA ANÁLISE</div>';
+
+                    // PROXYS
+                    if (grupos.proxy && grupos.proxy.length > 0) {
+                        html += '<div class="expand-card">';
+                        html += '<div class="header" onclick="toggleExpand(this)"><div class="titulo"><i class="fa fa-exclamation-triangle" style="color:#00C2FF;"></i><span>PROXYS DETECTADOS</span><span class="badge proxy">PROXY</span><span class="qtd">' + grupos.proxy.length + '</span></div><span class="seta">▼</span></div>';
+                        html += '<div class="conteudo-expand">';
+                        grupos.proxy.forEach(function(item) {
+                            html += '<div class="item"><span class="nome">' + item.package + '</span><div class="status"><span class="tag proxy-tag">PROXY</span><span class="presente">PRESENTE</span><span class="logs"><span class="num">' + item.logs + '</span> log(s)</span></div><div class="desc">App presente no sistema (notificações/logs encontrados)</div></div>';
+                        });
+                        html += '<div style="margin-top:8px;font-size:0.6rem;color:#888;border-top:1px solid rgba(0,194,255,0.06);padding-top:8px;">🕐 ' + formatarData(agora) + '</div>';
+                        html += '</div></div>';
+                    }
+
+                    // MODIFICAÇÕES
+                    if (grupos.modificacao && grupos.modificacao.length > 0) {
+                        html += '<div class="expand-card">';
+                        html += '<div class="header" onclick="toggleExpand(this)"><div class="titulo"><i class="fa fa-cog" style="color:#A855F7;"></i><span>MODIFICAÇÕES DO SISTEMA (BUGREPORT)</span><span class="badge mod">SISTEMA</span><span class="qtd">' + grupos.modificacao.length + '</span></div><span class="seta">▼</span></div>';
+                        html += '<div class="conteudo-expand">';
+                        grupos.modificacao.forEach(function(item) {
+                            html += '<div class="item"><span class="nome">' + item.package + '</span><div class="status"><span class="tag mod-tag">SISTEMA</span><span class="presente">PRESENTE</span><span class="logs"><span class="num">' + item.logs + '</span> log(s)</span></div></div>';
+                        });
+                        html += '<div style="margin-top:8px;font-size:0.6rem;color:#888;border-top:1px solid rgba(168,85,247,0.06);padding-top:8px;">🕐 ' + formatarData(agora) + '</div>';
+                        html += '</div></div>';
+                    }
+
+                    // DESINSTALADOS
+                    if (desinstalados.length > 0) {
+                        html += '<div class="expand-card">';
+                        html += '<div class="header" onclick="toggleExpand(this)"><div class="titulo"><i class="fa fa-trash" style="color:#FF1A4A;"></i><span>APPS DESINSTALADOS (ÚLTIMAS 5H)</span><span class="badge uninstall">DESINSTALADO</span><span class="qtd">' + desinstalados.length + '</span></div><span class="seta">▼</span></div>';
+                        html += '<div class="conteudo-expand">';
+                        desinstalados.forEach(function(item) {
+                            html += '<div class="item">';
+                            html += '<div><span class="nome">' + item.package + '</span><div class="info">📅 <span class="data-hora">' + item.dataHora + '</span></div></div>';
+                            html += '<div class="status"><span class="tag uninstall-tag">DESINSTALADO</span><span class="logs">0 log(s)</span></div>';
+                            html += '<div class="desc">App desinstalado do sistema</div>';
+                            html += '</div>';
+                        });
+                        html += '<div style="margin-top:8px;font-size:0.6rem;color:#888;border-top:1px solid rgba(255,26,74,0.06);padding-top:8px;">🕐 ' + formatarData(agora) + '</div>';
+                        html += '</div></div>';
+                    }
+
+                    // SIDELOAD
+                    if (sideload.length > 0) {
+                        html += '<div class="expand-card">';
+                        html += '<div class="header" onclick="toggleExpand(this)"><div class="titulo"><i class="fa fa-download" style="color:#FF6B00;"></i><span>APPS INSTALADOS FORA DA PLAY STORE</span><span class="badge sideload">SIDELOAD</span><span class="qtd">' + sideload.length + '</span></div><span class="seta">▼</span></div>';
+                        html += '<div class="conteudo-expand">';
+                        sideload.forEach(function(item) {
+                            html += '<div class="item">';
+                            html += '<div><span class="nome">' + item.package + '</span><div class="info">📅 <span class="data-hora">' + item.dataHora + '</span></div></div>';
+                            html += '<div class="status"><span class="tag sideload-tag">SIDELOAD</span><span class="logs">0 log(s)</span></div>';
+                            html += '<div class="desc">App instalado via fonte externa (APK)</div>';
+                            html += '</div>';
+                        });
+                        html += '<div style="margin-top:8px;font-size:0.6rem;color:#888;border-top:1px solid rgba(255,107,0,0.06);padding-top:8px;">🕐 ' + formatarData(agora) + '</div>';
+                        html += '</div></div>';
+                    }
+
+                    if (totalDetectados === 0) {
+                        html += '<div style="text-align:center;padding:40px 0;border:1px solid rgba(0,255,136,0.1);border-radius:12px;background:rgba(0,255,136,0.02);"><i class="fa fa-check-circle" style="font-size:3rem;color:#00CC77;display:block;margin-bottom:12px;"></i><span style="font-size:1.2rem;color:#00CC77;">✅ SISTEMA LIMPO</span><p style="color:#888;margin-top:8px;">Nenhuma ameaça ou alteração suspeita detectada</p></div>';
+                    }
+
+                    html += '<div class="footer-safe"><p>🔒 Nenhum arquivo é transmitido ou armazenado. Toda a análise ocorre no navegador.<br><span class="email">trapscreen@gmail.com</span> <span style="color:#888;">| Diário (expira em 1 dia)</span></p></div>';
+
+                    areaResultado.innerHTML = html;
+                    
+                    setTimeout(function() {
+                        atualizarProgresso(0);
+                        areaProgresso.classList.add('hidden');
+                    }, 1500);
+
+                }, 400);
+
+            } catch (erro) {
+                alert('ERRO: ' + erro.message);
+                atualizarProgresso(0);
+                areaProgresso.classList.add('hidden');
+            }
+            finally {
+                botaoAnalisar.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
