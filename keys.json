@@ -1,7 +1,7 @@
 {
   "keys": [
     {
-      "key": "KERNEL",
+      "key": "HTML",
       "createdAt": "2026-07-10T14:30:00.000Z",
       "expiresIn": 30,
       "active": true
@@ -22,6 +22,24 @@
       "key": "M7",
       "createdAt": "2026-07-10T14:30:00.000Z",
       "expiresIn": 28,
+      "active": true
+    },
+    {
+      "key": "MACADETECT",
+      "createdAt": "2026-07-10T14:30:00.000Z",
+      "expiresIn": 1,
+      "active": true
+    },
+    {
+    "key": "SKUNK",
+      "createdAt": "2026-07-10T14:30:00.000Z",
+      "expiresIn": 30,
+      "active": true
+    },
+    {
+      "key": "FREE1D",
+      "createdAt": "2026-07-10T14:30:00.000Z",
+      "expiresIn": 1,
       "active": true
     }
   ]
