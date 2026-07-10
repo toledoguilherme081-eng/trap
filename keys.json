@@ -1,6 +1,22 @@
 {
   "keys": [
-    { "key": "TRAP", "createdAt": "2026-07-10T14:30:00.000Z", "expiresIn": 30, "active": true },
-    { "key": "EYE-TEST-0000-AAAA", "createdAt": "2026-07-20T10:00:00.000Z", "expiresIn": 7, "active": true }
+    {
+      "key": "HTML",
+      "createdAt": "2026-01-10T14:30:00.000Z",
+      "expiresIn": 30,
+      "active": true
+    },
+    {
+      "key": "TRAP",
+      "createdAt": "2026-01-15T10:20:00.000Z",
+      "expiresIn": 15,
+      "active": true
+    },
+    {
+      "key": "KERNEL",
+      "createdAt": "2026-01-01T08:00:00.000Z",
+      "expiresIn": 7,
+      "active": true
+    }
   ]
 }
