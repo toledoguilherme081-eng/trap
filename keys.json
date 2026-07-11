@@ -10,7 +10,7 @@
       "key": "ON",
       "createdAt": "2026-07-10T14:30:00.000Z",
       "expiresInhours": 1,
-      "active": true
+      "active": false
     },
     {
       "key": "TRAP",
