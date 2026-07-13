@@ -28,7 +28,8 @@
       "key": "MACADETECT",
       "createdAt": "2026-07-11T14:30:00.000Z",
       "expiresIn": 1,
-      "active": true
+      "active": false,
+      "expiredAt": "2026-07-13T11:43:58.034Z"
     },
     {
       "key": "SKUNK",
