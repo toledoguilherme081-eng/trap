@@ -37,9 +37,9 @@
       "active": true
     },
     {
-      "key": "LAGARTO",
-      "createdAt": "2026-01-11T14:30:00.000Z",
-      "expiresInHours": 5,
+      "key": "LUCASFFZ",
+      "createdAt": "2026-01-13T14:30:00.000Z",
+      "expiresIn": 30,
       "active": true
     }
   ]
