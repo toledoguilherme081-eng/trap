@@ -9,7 +9,7 @@
     {
       "key": "FERREIRA",
       "createdAt": "2026-07-16T14:30:00.000Z",
-      "expiresInhours": 1,
+      "expiresIn": 1,
       "active": true
     },
     {
