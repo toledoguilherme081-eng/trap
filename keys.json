@@ -25,13 +25,6 @@
       "active": true
     },
     {
-      "key": "PROXYFREE",
-      "createdAt": "2026-07-18T14:30:00.000Z",
-      "expiresIn": 1,
-      "active": true
-      "expiredAt": "2026-07-13T11:43:58.034Z"
-    },
-    {
       "key": "SKUNK",
       "createdAt": "2026-07-10T14:30:00.000Z",
       "expiresIn": 30,
