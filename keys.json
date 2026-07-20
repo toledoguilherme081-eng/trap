@@ -4,7 +4,8 @@
       "key": "PROXYFAKE",
       "createdAt": "2026-07-18T14:30:00.000Z",
       "expiresIn": 1,
-      "active": true
+      "active": false,
+      "expiredAt": "2026-07-20T10:34:25.633Z"
     },
     {
       "key": "OLIVEIRA",
