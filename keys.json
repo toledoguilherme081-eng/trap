@@ -11,8 +11,8 @@
       "key": "OLIVEIRA",
       "createdAt": "2026-07-19T14:30:00.000Z",
       "expiresIn": 1,
-      "active": true,
-      "expiredAt": "2026-07-20T07:11:50.030Z"
+      "active": false,
+      "expiredAt": "2026-07-21T09:33:32.732Z"
     },
     {
       "key": "TRAP04",
