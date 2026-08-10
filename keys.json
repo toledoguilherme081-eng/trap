@@ -31,7 +31,8 @@
       "key": "SKUNK",
       "createdAt": "2026-07-10T14:30:00.000Z",
       "expiresIn": 30,
-      "active": true
+      "active": false,
+      "expiredAt": "2026-08-10T02:03:37.676Z"
     },
     {
       "key": "LUCASFFZ",
