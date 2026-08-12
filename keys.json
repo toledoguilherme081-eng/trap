@@ -38,7 +38,8 @@
       "key": "LUCASFFZ",
       "createdAt": "2026-07-16T14:30:00.000Z",
       "expiresIn": 26,
-      "active": true
+      "active": false,
+      "expiredAt": "2026-08-12T02:11:37.427Z"
     }
   ]
 }
