@@ -28,10 +28,10 @@
       "expiredAt": "2026-08-08T01:51:22.868Z"
     },
     {
-      "key": "SKUNK",
-      "createdAt": "2026-07-10T14:30:00.000Z",
-      "expiresIn": 30,
-      "active": false,
+      "key": "BIFOV",
+      "createdAt": "2026-08-22T14:30:00.000Z",
+      "expiresIn": 7,
+      "active": true,
       "expiredAt": "2026-08-10T02:03:37.676Z"
     },
     {
