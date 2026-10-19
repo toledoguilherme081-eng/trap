@@ -18,7 +18,8 @@
       "key": "TRAP04",
       "createdAt": "2026-07-10T14:30:00.000Z",
       "expiresIn": 100,
-      "active": true
+      "active": false,
+      "expiredAt": "2026-10-19T03:55:30.273Z"
     },
     {
       "key": "ALBK",
